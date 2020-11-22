@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Get Package</title>
+    <meta charset="utf-8" />
+    <style>
+        .container_flex {
+            display: flex;
+            justify-content: space-around;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Get Package - Nest Server Testing Page</h1>
+    <div class="container_flex">
+        <div>
+            <h2>Login</h2>
+            <form id="form1">
+                <label>Name</label><br>
+                <input type="text" name="username" /><br>
+                <label>password</label><br>
+                <input type="text" name="password" /><br>
+                <input type="submit" value="Login" />
+            </form>
+        </div>
+        <div>
+            <h2>New User</h2>
+            <form id="form">
+                <label>User Name (unick)</label><br>
+                <input type="text" name="name" /><br>
+                <label>User password</label><br>
+                <input type="text" name="hash" /><br>
+                <label for="role">Choose a User Role:</label><br>
+                <select name="role">
+                    <option value="courier">Courier</option>
+                    <option value="sender">Sender</option>
+                </select>
+
+                <h3>For Courier</h3>
+                <label>first Name</label><br>
+                <input type="text" name="firstName" /><br>
+                <label>last Name</label><br>
+                <input type="text" name="lastName" /><br>
+                <label>phone Number</label><br>
+                <input type="text" name="phoneNumber" /><br>
+                <label>vehicleType</label><br>
+                <input type="text" name="vehicleType" /><br>
+
+                <h3>For Sender</h3>
+                <label>company Name</label><br>
+                <input type="text" name="companyName" /><br>
+
+                <input type="submit" value="Send" />
+            </form>
+        </div>
+        <div>
+            <h2>New Delivery</h2>
+            <form id="form2">
+                <label>package Size</label><br>
+                <input type="number" name="packageSize" /><br>
+                <label>cost</label><br>
+                <input type="number" name="cost" /><br>
+                <label>description</label><br>
+                <input type="text" name="description" /><br>
+                <label>date</label><br>
+                <input type="date" name="date" /><br>
+                <input type="submit" value="Send" />
+            </form>
+        </div>
+        <div>
+            <h2>Requests</h2>
+
+            <h3>Users List</h3>
+            <button id='btn_list'>User List</button>
+        </div>
+    </div>
+
+    <script>
+        let token = '';
+        form.onsubmit = async(e) => {
+            e.preventDefault();
+            try {
+                let response = await fetch('http://localhost:3000/newuser', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user: {
+                            name: form.elements["name"].value,
+                            role: form.elements["role"].value,
+                            hash: form.elements["hash"].value,
+                            salt: ''
+                        },
+                        courier: {
+                            firstName: form.elements["firstName"].value,
+                            lastName: form.elements["lastName"].value,
+                            phoneNumber: form.elements["phoneNumber"].value,
+                            vehicleType: form.elements["vehicleType"].value,
+                            user: '',
+                        },
+                        sender: {
+                            companyName: form.elements["companyName"].value,
+                            user: '',
+                        }
+                    })
+                });
+                const content = await response.text();
+                console.log(content);
+            } catch (err) {
+                console.log(err);
+            }
+        }
+        form1.onsubmit = async(e) => {
+            e.preventDefault();
+            try {
+                let response = await fetch('http://localhost:3000/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: form1.elements["username"].value,
+                        password: form1.elements["password"].value,
+                    })
+                });
+                const content1 = await response.json();
+                console.log(content1);
+                token = content1.access_token
+
+            } catch (err) {
+                console.log(err);
+            }
+        }
+        btn_list.onclick = async() => {
+            try {
+                let response = await fetch('http://localhost:3000/userslist', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                    }
+                });
+                const content = await response.json();
+                console.log(content);
+            } catch (err) {
+                console.log(err);
+            }
+        }
+
+        form2.onsubmit = async(e) => {
+            e.preventDefault();
+            try {
+                let response = await fetch('http://localhost:3000/newdelivery', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        packageSize: form2.elements["packageSize"].value,
+                        cost: form2.elements["cost"].value,
+                        description: form2.elements["description"].value,
+                        date: form2.elements["date"].value,
+                        sender: '',
+                        courier: '',
+                    })
+                });
+                const content1 = await response.json();
+                console.log(content1);
+                token = content1.access_token
+            } catch (err) {
+                console.log(err);
+            }
+        }
+    </script>
+</body>
+
+</html>
